@@ -1,11 +1,15 @@
 use tauri::image::Image;
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::path::BaseDirectory;
-use tauri::tray::{MouseButtonState, TrayIconBuilder, TrayIconEvent};
+#[cfg(target_os = "macos")]
+use tauri::tray::{MouseButtonState, TrayIconEvent};
+use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Emitter, Manager};
+#[cfg(target_os = "macos")]
 use tauri_nspanel::ManagerExt;
 use tauri_plugin_store::StoreExt;
 
+#[cfg(target_os = "macos")]
 use crate::panel::{get_or_init_panel, position_panel_at_tray_icon, show_panel};
 
 const LOG_LEVEL_STORE_KEY: &str = "logLevel";
@@ -146,14 +150,17 @@ pub fn create(app_handle: &AppHandle) -> tauri::Result<()> {
             log::debug!("tray menu: {}", event.id.as_ref());
             match event.id.as_ref() {
                 "show_stats" => {
+                    #[cfg(target_os = "macos")]
                     show_panel(app_handle);
                     let _ = app_handle.emit("tray:navigate", "home");
                 }
                 "go_to_settings" => {
+                    #[cfg(target_os = "macos")]
                     show_panel(app_handle);
                     let _ = app_handle.emit("tray:navigate", "settings");
                 }
                 "about" => {
+                    #[cfg(target_os = "macos")]
                     show_panel(app_handle);
                     let _ = app_handle.emit("tray:show-about", ());
                 }
@@ -179,28 +186,31 @@ pub fn create(app_handle: &AppHandle) -> tauri::Result<()> {
                 _ => {}
             }
         })
-        .on_tray_icon_event(|tray, event| {
-            let app_handle = tray.app_handle();
-
-            if let TrayIconEvent::Click {
-                button_state, rect, ..
-            } = event
+        .on_tray_icon_event(|_tray, _event| {
+            #[cfg(target_os = "macos")]
             {
-                if button_state == MouseButtonState::Up {
-                    let Some(panel) = get_or_init_panel!(app_handle) else {
-                        return;
-                    };
+                let app_handle = _tray.app_handle();
 
-                    if panel.is_visible() {
-                        log::debug!("tray click: hiding panel");
-                        panel.hide();
-                        return;
+                if let TrayIconEvent::Click {
+                    button_state, rect, ..
+                } = _event
+                {
+                    if button_state == MouseButtonState::Up {
+                        let Some(panel) = get_or_init_panel!(app_handle) else {
+                            return;
+                        };
+
+                        if panel.is_visible() {
+                            log::debug!("tray click: hiding panel");
+                            panel.hide();
+                            return;
+                        }
+                        log::debug!("tray click: showing panel");
+
+                        // macOS quirk: must show window before positioning to another monitor
+                        panel.show_and_make_key();
+                        position_panel_at_tray_icon(app_handle, rect.position, rect.size);
                     }
-                    log::debug!("tray click: showing panel");
-
-                    // macOS quirk: must show window before positioning to another monitor
-                    panel.show_and_make_key();
-                    position_panel_at_tray_icon(app_handle, rect.position, rect.size);
                 }
             }
         })

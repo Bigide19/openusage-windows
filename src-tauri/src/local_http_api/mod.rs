@@ -1,4 +1,4 @@
-pub(crate) mod cache;
+pub mod cache;
 mod server;
 
 pub use cache::{cache_successful_output, init};

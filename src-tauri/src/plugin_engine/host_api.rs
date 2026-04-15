@@ -2006,9 +2006,12 @@ fn inject_keychain<'js>(
             ctx.clone(),
             move |ctx_inner: Ctx<'_>, service: String| -> rquickjs::Result<String> {
                 if !cfg!(target_os = "macos") {
+                    // Throw a "not found"-style error so plugins fall back to file-based auth
+                    // (same code path as macOS keychain miss). TODO Phase 4: integrate Windows
+                    // Credential Manager via `keyring` crate.
                     return Err(Exception::throw_message(
                         &ctx_inner,
-                        "keychain API is only supported on macOS",
+                        "keychain item not found: keychain not available on this platform",
                     ));
                 }
                 log::info!("[plugin:{}] keychain read: service={}", pid_read, service);
@@ -2054,9 +2057,12 @@ fn inject_keychain<'js>(
             ctx.clone(),
             move |ctx_inner: Ctx<'_>, service: String| -> rquickjs::Result<String> {
                 if !cfg!(target_os = "macos") {
+                    // Throw a "not found"-style error so plugins fall back to file-based auth
+                    // (same code path as macOS keychain miss). TODO Phase 4: integrate Windows
+                    // Credential Manager via `keyring` crate.
                     return Err(Exception::throw_message(
                         &ctx_inner,
-                        "keychain API is only supported on macOS",
+                        "keychain item not found: keychain not available on this platform",
                     ));
                 }
                 let account = current_macos_keychain_account();
@@ -2112,9 +2118,12 @@ fn inject_keychain<'js>(
             ctx.clone(),
             move |ctx_inner: Ctx<'_>, service: String, value: String| -> rquickjs::Result<()> {
                 if !cfg!(target_os = "macos") {
+                    // Throw a "not found"-style error so plugins fall back to file-based auth
+                    // (same code path as macOS keychain miss). TODO Phase 4: integrate Windows
+                    // Credential Manager via `keyring` crate.
                     return Err(Exception::throw_message(
                         &ctx_inner,
-                        "keychain API is only supported on macOS",
+                        "keychain item not found: keychain not available on this platform",
                     ));
                 }
                 log::info!("[plugin:{}] keychain write: service={}", pid_write, service);
@@ -2186,9 +2195,12 @@ fn inject_keychain<'js>(
             ctx.clone(),
             move |ctx_inner: Ctx<'_>, service: String, value: String| -> rquickjs::Result<()> {
                 if !cfg!(target_os = "macos") {
+                    // Throw a "not found"-style error so plugins fall back to file-based auth
+                    // (same code path as macOS keychain miss). TODO Phase 4: integrate Windows
+                    // Credential Manager via `keyring` crate.
                     return Err(Exception::throw_message(
                         &ctx_inner,
-                        "keychain API is only supported on macOS",
+                        "keychain item not found: keychain not available on this platform",
                     ));
                 }
                 let account = current_macos_keychain_account();

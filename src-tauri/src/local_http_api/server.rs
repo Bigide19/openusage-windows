@@ -67,6 +67,14 @@ fn handle_connection(mut stream: TcpStream) {
 }
 
 fn route(method: &str, path: &str) -> String {
+    // Health check (used by WPF frontend to wait for the headless backend)
+    if path == "/health" {
+        return match method {
+            "GET" => response_text(200, "OK", "OK"),
+            _ => response_method_not_allowed(),
+        };
+    }
+
     // Match routes
     if path == "/v1/usage" {
         return match method {
@@ -128,6 +136,17 @@ Access-Control-Allow-Headers: Content-Type";
 fn response_json(status: u16, reason: &str, body: &str) -> String {
     format!(
         "HTTP/1.1 {} {}\r\nConnection: close\r\nContent-Type: application/json; charset=utf-8\r\n{}\r\nContent-Length: {}\r\n\r\n{}",
+        status,
+        reason,
+        CORS_HEADERS,
+        body.len(),
+        body,
+    )
+}
+
+fn response_text(status: u16, reason: &str, body: &str) -> String {
+    format!(
+        "HTTP/1.1 {} {}\r\nConnection: close\r\nContent-Type: text/plain; charset=utf-8\r\n{}\r\nContent-Length: {}\r\n\r\n{}",
         status,
         reason,
         CORS_HEADERS,
