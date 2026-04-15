@@ -1,0 +1,143 @@
+name: Build Windows Installer
+
+on:
+  # Pushing a tag like v0.1.0-win produces a release with the installer attached.
+  push:
+    tags:
+      - 'v*-win'
+  # Manual run from the Actions UI (for testing / pre-release builds).
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version string (e.g., 0.1.0-win)'
+        required: true
+        default: '0.0.0-dev'
+      create_release:
+        description: 'Attach to a GitHub Release (draft)'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write  # needed to create a Release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            V="${{ inputs.version }}"
+          else
+            V="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=${V}" >> "$GITHUB_OUTPUT"
+          echo "Version: ${V}"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install LLVM (for rquickjs bindgen)
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: '18.1'
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Bundle JS plugins into Rust resources
+        run: node copy-bundled.cjs
+
+      - name: Build Rust headless backend (release)
+        working-directory: src-tauri
+        run: cargo build --release --bin openusage
+
+      - name: Publish WPF (self-contained win-x64)
+        working-directory: wpf
+        run: >
+          dotnet publish src/OpenUsage.App/OpenUsage.App.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=false
+          -p:DebugType=none -p:DebugSymbols=false
+          -o ${{ github.workspace }}/dist/payload
+
+      - name: Stage Rust backend under payload/backend
+        shell: bash
+        run: |
+          set -e
+          mkdir -p dist/payload/backend
+          cp src-tauri/target/release/openusage.exe dist/payload/backend/
+          cp -r src-tauri/resources dist/payload/backend/
+          echo "payload layout:"
+          ls dist/payload/ | head -20
+          echo "backend:"
+          ls dist/payload/backend/
+
+      - name: Verify NSIS available
+        shell: cmd
+        run: |
+          where makensis
+          makensis /VERSION
+
+      - name: Build NSIS installer
+        shell: cmd
+        working-directory: installer
+        run: makensis /DVERSION=${{ steps.version.outputs.version }} openusage.nsi
+
+      - name: Show installer details
+        shell: bash
+        run: |
+          ls -la installer/OpenUsage-Setup-*.exe
+          du -h installer/OpenUsage-Setup-*.exe
+
+      - name: Upload installer as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenUsage-Setup-${{ steps.version.outputs.version }}
+          path: installer/OpenUsage-Setup-*.exe
+          if-no-files-found: error
+
+      - name: Create GitHub Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer/OpenUsage-Setup-*.exe
+          draft: true
+          generate_release_notes: true
+          name: OpenUsage Windows ${{ steps.version.outputs.version }}
+          tag_name: ${{ github.ref_name }}
+
+      - name: Create GitHub Release (manual)
+        if: github.event_name == 'workflow_dispatch' && inputs.create_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer/OpenUsage-Setup-*.exe
+          draft: true
+          name: OpenUsage Windows ${{ steps.version.outputs.version }}
+          tag_name: v${{ steps.version.outputs.version }}

@@ -6,9 +6,10 @@ See your usage at a glance from your menu bar. No digging through dashboards.
 
 ## Download
 
-[**Download the latest release**](https://github.com/robinebers/openusage/releases/latest) (macOS, Apple Silicon & Intel)
+- **Windows** — [Latest installer](https://github.com/Bigide19/openusage-windows/releases/latest) (NSIS setup, per-user install, no admin required)
+- **macOS** — [Upstream release](https://github.com/robinebers/openusage/releases/latest) (Apple Silicon & Intel)
 
-The app auto-updates. Install once and you're set.
+> The Windows build is a [fork](https://github.com/Bigide19/openusage-windows) that ships a .NET/WPF frontend with the original Rust plugin engine as a headless sidecar. See [`wpf/`](wpf/) for the WPF project and [`installer/`](installer/) for the NSIS packaging. The macOS app auto-updates; the Windows installer currently does not.
 
 ## What It Does
 
