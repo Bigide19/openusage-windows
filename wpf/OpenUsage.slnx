@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/OpenUsage.App/OpenUsage.App.csproj" />
+    <Project Path="src/OpenUsage.Core/OpenUsage.Core.csproj" />
+    <Project Path="src/OpenUsage.Services/OpenUsage.Services.csproj" />
+    <Project Path="src/OpenUsage.ViewModels/OpenUsage.ViewModels.csproj" />
+  </Folder>
+</Solution>

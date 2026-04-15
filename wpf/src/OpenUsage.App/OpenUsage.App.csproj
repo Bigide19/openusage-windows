@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>OpenUsage</AssemblyName>
+    <RootNamespace>OpenUsage.App</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.*" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.*" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.*" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenUsage.ViewModels\OpenUsage.ViewModels.csproj" />
+    <ProjectReference Include="..\OpenUsage.Services\OpenUsage.Services.csproj" />
+    <ProjectReference Include="..\OpenUsage.Core\OpenUsage.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\tray-icon.ico" />
+    <Resource Include="Assets\tray-icon.png" />
+  </ItemGroup>
+
+  <!-- Plugin manifests + icons (read by PluginManifestLoader for sidebar metadata).
+       Plugins live at the repo root (openusage-windows/plugins). -->
+  <ItemGroup>
+    <Content Include="..\..\..\plugins\**\*" CopyToOutputDirectory="PreserveNewest" Link="plugins\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- Rust headless backend binary + its bundled plugin resources. Copied into
+       a backend/ subdirectory to avoid the OpenUsage.exe / openusage.exe
+       case-insensitive filename collision on Windows. -->
+  <Target Name="CopyRustBackend" AfterTargets="Build">
+    <PropertyGroup>
+      <RustReleaseDir>$(MSBuildThisFileDirectory)..\..\..\src-tauri\target\release</RustReleaseDir>
+      <BackendOutDir>$(OutDir)backend\</BackendOutDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <RustBin Include="$(RustReleaseDir)\openusage.exe" />
+      <RustResources Include="$(RustReleaseDir)\resources\**\*" />
+    </ItemGroup>
+    <Message Importance="high" Text="[CopyRustBackend] from $(RustReleaseDir) to $(BackendOutDir)" />
+    <Copy SourceFiles="@(RustBin)"
+          DestinationFolder="$(BackendOutDir)"
+          SkipUnchangedFiles="true"
+          Condition="Exists('%(RustBin.FullPath)')" />
+    <Copy SourceFiles="@(RustResources)"
+          DestinationFolder="$(BackendOutDir)resources\%(RecursiveDir)"
+          SkipUnchangedFiles="true"
+          Condition="'@(RustResources)' != ''" />
+    <Warning Text="Rust backend binary not found at $(RustReleaseDir)\openusage.exe — run 'cargo build --release' in src-tauri first."
+             Condition="!Exists('$(RustReleaseDir)\openusage.exe')" />
+  </Target>
+
+</Project>

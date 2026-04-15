@@ -1,0 +1,73 @@
+<UserControl x:Class="OpenUsage.App.Views.ProviderDetailPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:OpenUsage.App.Views.Controls">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  Padding="12">
+        <StackPanel>
+            <!-- Provider header -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                <TextBlock Text="{Binding Meta.Name}"
+                           FontSize="20" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           VerticalAlignment="Center" />
+
+                <!-- Plan badge -->
+                <Border CornerRadius="4" Padding="8,2" Margin="10,0,0,0"
+                        Background="{DynamicResource MutedBackgroundBrush}"
+                        VerticalAlignment="Center"
+                        Visibility="{Binding Data.Plan, Converter={StaticResource NullToCollapsedConverter}, FallbackValue=Collapsed}">
+                    <TextBlock Text="{Binding Data.Plan}" FontSize="11"
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                </Border>
+            </StackPanel>
+
+            <!-- Links section -->
+            <ItemsControl ItemsSource="{Binding Links}" Margin="0,0,0,20">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Tag="{Binding Url}"
+                                Click="Link_Click"
+                                Cursor="Hand"
+                                Margin="0,0,8,6">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="LinkBorder"
+                                            CornerRadius="12" Padding="10,5"
+                                            BorderThickness="1"
+                                            BorderBrush="{DynamicResource BorderBrush}"
+                                            Background="Transparent">
+                                        <TextBlock Text="{Binding Label}" FontSize="12"
+                                                   Foreground="{DynamicResource AccentBrush}" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="LinkBorder" Property="Background"
+                                                    Value="{DynamicResource ButtonHoverBrush}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- All metric lines -->
+            <ItemsControl ItemsSource="{Binding Data.Lines}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <controls:MetricLineControl Margin="0,0,0,12" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

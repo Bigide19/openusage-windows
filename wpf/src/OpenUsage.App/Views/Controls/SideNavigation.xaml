@@ -1,0 +1,115 @@
+<UserControl x:Class="OpenUsage.App.Views.Controls.SideNavigation"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="48">
+
+    <UserControl.Resources>
+        <!-- Base style for all nav buttons (background tint for active state) -->
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="48" />
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <!-- Single rounded background, no left-edge indicator -->
+                        <Border x:Name="Bg"
+                                Background="Transparent"
+                                CornerRadius="8"
+                                Margin="6,3">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <!-- Tag="Active" = subtle filled background -->
+                            <Trigger Property="Tag" Value="Active">
+                                <Setter TargetName="Bg" Property="Background"
+                                        Value="{DynamicResource ButtonHoverBrush}" />
+                            </Trigger>
+                            <!-- Hover = subtle background -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background"
+                                        Value="{DynamicResource ButtonHoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="{DynamicResource SidebarBackgroundBrush}"
+            BorderBrush="{DynamicResource SidebarBorderBrush}"
+            BorderThickness="0,0,1,0"
+            CornerRadius="12,0,0,12">
+
+        <DockPanel LastChildFill="True">
+
+            <!-- ── Top: Pin button ── -->
+            <Button x:Name="PinButton"
+                    DockPanel.Dock="Top"
+                    Style="{StaticResource NavButtonStyle}"
+                    Click="Pin_Click"
+                    ToolTip="Pin window (keep open)">
+                <TextBlock x:Name="PinIcon" Text="&#xE718;"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="16"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+            </Button>
+
+            <!-- ── Home button (Gauge icon, Lucide-style) ── -->
+            <Button x:Name="HomeButton"
+                    DockPanel.Dock="Top"
+                    Style="{StaticResource NavButtonStyle}"
+                    Click="Home_Click"
+                    ToolTip="Overview">
+                <Viewbox Width="20" Height="20">
+                    <Canvas Width="24" Height="24">
+                        <!-- Gauge needle -->
+                        <Path x:Name="HomeIconNeedle"
+                              Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="2"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                              Data="M 12 14 L 16 10" />
+                        <!-- Gauge arc -->
+                        <Path x:Name="HomeIconArc"
+                              Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="2"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                              Data="M 3.34 19 A 10 10 0 1 1 20.66 19" />
+                    </Canvas>
+                </Viewbox>
+            </Button>
+
+            <!-- ── Bottom: Settings button (Segoe MDL2 gear) ── -->
+            <Button x:Name="SettingsButton"
+                    DockPanel.Dock="Bottom"
+                    Style="{StaticResource NavButtonStyle}"
+                    Click="Settings_Click"
+                    ToolTip="Settings">
+                <TextBlock x:Name="SettingsIcon" Text="&#xE713;"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="18"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+            </Button>
+
+            <!-- ── Separator between home and plugin list ── -->
+            <Border DockPanel.Dock="Top" Height="1" Margin="8,4"
+                    Background="{DynamicResource SidebarBorderBrush}" />
+
+            <!-- ── Middle: Plugin list (scrollable, scrollbar hidden) ── -->
+            <ScrollViewer VerticalScrollBarVisibility="Hidden"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel x:Name="PluginPanel" />
+            </ScrollViewer>
+
+        </DockPanel>
+    </Border>
+</UserControl>
