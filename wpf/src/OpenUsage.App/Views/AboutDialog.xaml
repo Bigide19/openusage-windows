@@ -9,7 +9,7 @@
         Background="{DynamicResource PanelBackgroundBrush}">
 
     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-        <TextBlock Text="OpenUsage" FontSize="20" FontWeight="Bold"
+        <TextBlock Text="OpenUsage for Windows" FontSize="20" FontWeight="Bold"
                    Foreground="{DynamicResource TextPrimaryBrush}"
                    HorizontalAlignment="Center" Margin="0,0,0,8" />
         <TextBlock Text="{Binding AppVersion}" FontSize="13"
@@ -17,10 +17,15 @@
                    HorizontalAlignment="Center" Margin="0,0,0,12" />
         <TextBlock FontSize="12" HorizontalAlignment="Center"
                    Foreground="{DynamicResource AccentBrush}" Cursor="Hand"
-                   MouseLeftButtonUp="ProjectUrl_Click">
-            <TextBlock.Text>
-                <Binding Path="ProjectUrl" />
-            </TextBlock.Text>
+                   MouseLeftButtonUp="ProjectUrl_Click"
+                   Text="{Binding ProjectUrl}" />
+        <TextBlock FontSize="11" HorizontalAlignment="Center"
+                   Foreground="{DynamicResource TextMutedBrush}"
+                   Margin="0,8,0,0"
+                   Cursor="Hand"
+                   MouseLeftButtonUp="UpstreamUrl_Click">
+            <Run Text="Fork of " /><Run Text="robinebers/openusage"
+                   Foreground="{DynamicResource AccentBrush}" />
         </TextBlock>
         <TextBlock Text="MIT License" FontSize="11"
                    Foreground="{DynamicResource TextMutedBrush}"

@@ -18,4 +18,12 @@ public partial class AboutDialog : Window
             Process.Start(new ProcessStartInfo(vm.ProjectUrl) { UseShellExecute = true });
         }
     }
+
+    private void UpstreamUrl_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is ViewModels.AboutViewModel vm)
+        {
+            Process.Start(new ProcessStartInfo(vm.UpstreamUrl) { UseShellExecute = true });
+        }
+    }
 }
