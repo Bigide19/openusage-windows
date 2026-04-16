@@ -69,11 +69,8 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 Section "Install"
   SetOutPath "$INSTDIR"
 
-  ; Fail fast if the expected payload isn't there (catches CI misconfig).
-  IfFileExists "..\dist\payload\${APPEXE}" +3 0
-    MessageBox MB_OK|MB_ICONSTOP "Missing build output: dist\payload\${APPEXE}"
-    Abort
-
+  ; File /r bundles at build time — if the payload is missing, makensis
+  ; itself will fail, so no runtime check is needed.
   File /r "..\dist\payload\*.*"
 
   ; Start Menu shortcut
