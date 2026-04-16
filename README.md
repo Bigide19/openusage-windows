@@ -1,27 +1,52 @@
-# Track all your AI coding subscriptions in one place
+# OpenUsage for Windows
 
-See your usage at a glance from your menu bar. No digging through dashboards.
+Track all your AI coding subscriptions from the Windows system tray. Fork of
+[robinebers/openusage](https://github.com/robinebers/openusage) with a native
+.NET / WPF frontend driving the original Rust plugin engine as a headless
+sidecar.
 
 ![OpenUsage Screenshot](screenshot.png)
 
 ## Download
 
-- **Windows** — [Latest installer](https://github.com/Bigide19/openusage-windows/releases/latest) (NSIS setup, per-user install, no admin required)
-- **macOS** — [Upstream release](https://github.com/robinebers/openusage/releases/latest) (Apple Silicon & Intel)
+- **Windows** — [Latest installer](https://github.com/Bigide19/openusage-windows/releases/latest)
+  (NSIS setup, per-user install under `%LOCALAPPDATA%\OpenUsage`, no admin required)
+- **macOS / Linux** — use the [upstream release](https://github.com/robinebers/openusage/releases/latest)
 
-> The Windows build is a [fork](https://github.com/Bigide19/openusage-windows) that ships a .NET/WPF frontend with the original Rust plugin engine as a headless sidecar. See [`wpf/`](wpf/) for the WPF project and [`installer/`](installer/) for the NSIS packaging. The macOS app auto-updates; the Windows installer currently does not.
+> Auto-update is not yet wired in the Windows installer — pull a new version
+> from the releases page when you want to upgrade.
 
 ## What It Does
 
-OpenUsage lives in your menu bar and shows you how much of your AI coding subscriptions you've used. Progress bars, badges, and clear labels. No mental math required.
+OpenUsage lives in your system tray and shows how much of your AI coding
+subscriptions you've used. Progress bars, badges, clear labels — no mental math.
 
 - **One glance.** All your AI tools, one panel.
-- **Always up-to-date.** Refreshes automatically on a schedule you pick.
-- **Global shortcut.** Toggle the panel from anywhere with a customizable keyboard shortcut.
+- **Always up-to-date.** Refreshes automatically on a schedule you pick, or click
+  the "Next update in …" countdown to refresh immediately.
+- **Global shortcut.** Toggle the panel from anywhere with a customizable hotkey.
 - **Lightweight.** Opens instantly, stays out of your way.
 - **Plugin-based.** New providers get added without updating the whole app.
-- **[Local HTTP API](docs/local-http-api.md).** Other apps can read your usage data from `127.0.0.1:6736`.
-- **[Proxy support](docs/proxy.md).** Route provider HTTP requests through a SOCKS5 or HTTP proxy.
+- **[Local HTTP API](docs/local-http-api.md).** Other apps can read your usage
+  data from `127.0.0.1:6736`.
+- **[Proxy support](docs/proxy.md).** Route provider HTTP requests through a
+  SOCKS5 or HTTP proxy.
+
+## Optional: per-day token breakdown (Claude / Codex)
+
+The Claude and Codex providers include an extra "Today / Yesterday / Last 30
+Days" breakdown that reads your local conversation logs (`~/.claude/`,
+`~/.codex/`) via [`ccusage`](https://www.npmjs.com/package/ccusage).
+
+To enable those lines, install **one** of the following so OpenUsage can spawn
+`ccusage`:
+
+- [Node.js 20+](https://nodejs.org/) (provides `npx` — simplest)
+- [Bun](https://bun.sh/) (provides `bunx` — faster)
+
+If neither is on `PATH`, OpenUsage still works — you just won't see the per-day
+lines. All other providers (Cursor, Copilot, Gemini, …) and Claude's
+session/weekly quotas are unaffected.
 
 ## Supported Providers
 
@@ -41,51 +66,28 @@ OpenUsage lives in your menu bar and shows you how much of your AI coding subscr
 - [**Windsurf**](docs/providers/windsurf.md) / prompt credits, flex credits
 - [**Z.ai**](docs/providers/zai.md) / session, weekly, web searches
 
-Community contributions welcome.
+Plugins are shared with upstream — a new provider added there lands here on the
+next sync. Want a provider that's not listed? Open it against
+[robinebers/openusage](https://github.com/robinebers/openusage/issues/new).
 
-Want a provider that's not listed? [Open an issue.](https://github.com/robinebers/openusage/issues/new)
+## How to Contribute
 
-## Open Source, Community Driven
+Where to report depends on what's broken:
 
-OpenUsage is built by its users. Hundreds of people use it daily, and the project grows through community contributions: new providers, bug fixes, and ideas.
+- **Windows UI / installer / hotkey bug** → file here:
+  [Bigide19/openusage-windows/issues](https://github.com/Bigide19/openusage-windows/issues)
+- **Plugin / provider / data issue** → file upstream:
+  [robinebers/openusage/issues](https://github.com/robinebers/openusage/issues)
+- **Add a new provider** → see the [Plugin API](docs/plugins/api.md) and PR
+  upstream (plugins are JS and vendored from the upstream repo).
 
-I maintain the project as a guide and quality gatekeeper, but this is your app as much as mine. If something is missing or broken, the best way to get it fixed is to contribute by opening an issue, or submitting a PR.
-
-Plugins are currently bundled as we build our the API, but soon will be made flexible so you can build and load their own.
-
-<a href="https://www.star-history.com/?repos=robinebers%2Fopenusage&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=robinebers/openusage&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=robinebers/openusage&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=robinebers/openusage&type=date&legend=top-left" />
- </picture>
-</a>
-
-### How to Contribute
-
-- **Add a provider.** Each one is just a plugin. See the [Plugin API](docs/plugins/api.md).
-- **Fix a bug.** PRs welcome. Provide before/after screenshots.
-- **Request a feature.** [Open an issue](https://github.com/robinebers/openusage/issues/new) and make your case.
-
-Keep it simple. No feature creep, no AI-generated commit messages, test your changes.
-
-## Built Entirely with AI
-
-Not a single line of code in this project was read or written by hand. 100% AI-generated, AI-reviewed, AI-shipped — using [Cursor](https://cursor.com), [Claude Code](https://docs.anthropic.com/en/docs/claude-code), and [Codex CLI](https://github.com/openai/codex).
-
-OpenUsage is a real-world example of what I teach in the [AI Builder's Blueprint](https://itsbyrob.in/EBDqgJ6) — a proven process for building and shipping software with AI, no coding background required.
-
-## Sponsors
-
-OpenUsage is supported by our sponsors. Become a sponsor to get your logo here and on [openusage.ai](https://openusage.ai).
-
-[Become a Sponsor](https://github.com/sponsors/robinebers)
-
-<!-- Add sponsor logos here -->
+PRs welcome. Keep it simple, include before/after screenshots for UI changes,
+and run `dotnet build` before submitting.
 
 ## Credits
 
-Inspired by [CodexBar](https://github.com/steipete/CodexBar) by [@steipete](https://github.com/steipete). Same idea, very different approach.
+- Upstream project and plugin ecosystem: [robinebers/openusage](https://github.com/robinebers/openusage)
+- Original idea: [CodexBar](https://github.com/steipete/CodexBar) by [@steipete](https://github.com/steipete)
 
 ## License
 
@@ -93,11 +95,42 @@ Inspired by [CodexBar](https://github.com/steipete/CodexBar) by [@steipete](http
 
 ---
 
-<details>
-<summary><strong>Build from source</strong></summary>
+## Build from source
 
-> **Warning**: The `main` branch may not be stable. It is merged directly without staging, so users are advised to use tagged versions for stable builds. Tagged versions are fully tested while `main` may contain unreleased features.
+> **Warning:** the `main` branch tracks in-progress work. Use tagged releases
+> for stable builds.
 
 ### Stack
 
-...
+- **Frontend:** .NET 10 WPF app (`wpf/`) — see [`wpf/CLAUDE.md`](wpf/CLAUDE.md)
+- **Backend:** Rust headless sidecar (`src-tauri/`) running the plugin engine +
+  local HTTP API on `127.0.0.1:6736`
+- **Installer:** NSIS script (`installer/`) — see [`installer/README.md`](installer/README.md)
+
+### Prerequisites
+
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [Rust (stable)](https://www.rust-lang.org/tools/install) with the `x86_64-pc-windows-msvc` target
+- [Node.js 20+](https://nodejs.org/) (only for bundling plugins into the Rust binary)
+- [NSIS](https://nsis.sourceforge.io/) if you want to build the installer
+
+### Dev loop
+
+```powershell
+# Bundle plugins into the Rust resources dir
+node copy-bundled.cjs
+
+# Build the Rust headless backend
+cargo build --manifest-path src-tauri/Cargo.toml --release --bin openusage
+
+# Run the WPF app (spawns the Rust backend as a child process)
+dotnet run --project wpf/src/OpenUsage.App
+```
+
+Settings are persisted at `%APPDATA%\OpenUsage\settings.json`; logs at
+`%APPDATA%\OpenUsage\logs\`.
+
+### Release build + installer
+
+See [`installer/README.md`](installer/README.md) for the NSIS packaging steps,
+or trigger the `windows-installer` GitHub Actions workflow on a tag.
