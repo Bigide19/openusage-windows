@@ -1,27 +1,68 @@
 name: CI
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'src-tauri/**'
+      - 'wpf/**'
+      - 'plugins/**'
+      - 'copy-bundled.cjs'
   pull_request:
     branches: [main]
+    paths:
+      - 'src-tauri/**'
+      - 'wpf/**'
+      - 'plugins/**'
+      - 'copy-bundled.cjs'
 
 permissions:
   contents: read
 
 jobs:
-  check:
-    name: Lint, Type-check, Build, Test
-    runs-on: ubuntu-latest
+  build-rust:
+    name: Build Rust backend
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: oven-sh/setup-bun@v2
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: KyleMayes/install-llvm-action@v2
         with:
-          bun-version: latest
+          version: '18.1'
 
-      - run: bun install
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            src-tauri/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
 
-      - name: Type-check and build
-        run: bun run build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      - name: Run tests
-        run: bun run test
+      - name: Bundle JS plugins
+        run: node copy-bundled.cjs
+
+      - name: Build
+        working-directory: src-tauri
+        run: cargo build --release --bin openusage
+
+  build-wpf:
+    name: Build WPF app
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build
+        working-directory: wpf
+        run: dotnet build -c Release
