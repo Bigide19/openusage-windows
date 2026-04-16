@@ -1538,6 +1538,9 @@ fn ccusage_runner_candidates(kind: CcusageRunnerKind) -> Vec<String> {
         CcusageRunnerKind::Bunx => {
             if let Some(home) = dirs::home_dir() {
                 candidates.push(home.join(".bun/bin/bunx").to_string_lossy().to_string());
+                // Windows installs bun to %USERPROFILE%\.bun\bin\bunx.exe
+                #[cfg(windows)]
+                candidates.push(home.join(".bun/bin/bunx.exe").to_string_lossy().to_string());
             }
             candidates.extend(
                 ["/opt/homebrew/bin/bunx", "/usr/local/bin/bunx", "bunx"]
@@ -1573,6 +1576,26 @@ fn ccusage_runner_candidates(kind: CcusageRunnerKind) -> Vec<String> {
                     .map(str::to_string),
             );
         }
+    }
+
+    // On Windows, Node/pnpm/yarn ship as .cmd shims. Rust's Command::new
+    // auto-falls-back to .exe but never to .cmd/.bat, so every bare name we
+    // want to invoke needs an explicit .cmd twin. Append rather than replace
+    // so non-Windows behavior is untouched.
+    #[cfg(windows)]
+    {
+        let with_cmd: Vec<String> = candidates
+            .iter()
+            .filter(|c| {
+                let lower = c.to_ascii_lowercase();
+                !lower.ends_with(".cmd")
+                    && !lower.ends_with(".exe")
+                    && !lower.ends_with(".bat")
+                    && !lower.ends_with(".ps1")
+            })
+            .map(|c| format!("{c}.cmd"))
+            .collect();
+        candidates.extend(with_cmd);
     }
 
     let mut unique = Vec::new();
