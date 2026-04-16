@@ -1,4 +1,4 @@
-name: Build Windows Installer
+name: Publish Windows
 
 on:
   # Pushing a tag like v0.1.0-win produces a release with the installer attached.

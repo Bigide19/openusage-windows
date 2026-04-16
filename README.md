@@ -11,10 +11,8 @@ sidecar.
 
 - **Windows** — [Latest installer](https://github.com/Bigide19/openusage-windows/releases/latest)
   (NSIS setup, per-user install under `%LOCALAPPDATA%\OpenUsage`, no admin required)
-- **macOS / Linux** — use the [upstream release](https://github.com/robinebers/openusage/releases/latest)
-
-> Auto-update is not yet wired in the Windows installer — pull a new version
-> from the releases page when you want to upgrade.
+- **macOS** — [Original project release](https://github.com/robinebers/openusage/releases/latest)
+  (this fork focuses on Windows; macOS users should install from the upstream project)
 
 ## What It Does
 
@@ -31,22 +29,6 @@ subscriptions you've used. Progress bars, badges, clear labels — no mental mat
   data from `127.0.0.1:6736`.
 - **[Proxy support](docs/proxy.md).** Route provider HTTP requests through a
   SOCKS5 or HTTP proxy.
-
-## Optional: per-day token breakdown (Claude / Codex)
-
-The Claude and Codex providers include an extra "Today / Yesterday / Last 30
-Days" breakdown that reads your local conversation logs (`~/.claude/`,
-`~/.codex/`) via [`ccusage`](https://www.npmjs.com/package/ccusage).
-
-To enable those lines, install **one** of the following so OpenUsage can spawn
-`ccusage`:
-
-- [Node.js 20+](https://nodejs.org/) (provides `npx` — simplest)
-- [Bun](https://bun.sh/) (provides `bunx` — faster)
-
-If neither is on `PATH`, OpenUsage still works — you just won't see the per-day
-lines. All other providers (Cursor, Copilot, Gemini, …) and Claude's
-session/weekly quotas are unaffected.
 
 ## Supported Providers
 
@@ -67,22 +49,7 @@ session/weekly quotas are unaffected.
 - [**Z.ai**](docs/providers/zai.md) / session, weekly, web searches
 
 Plugins are shared with upstream — a new provider added there lands here on the
-next sync. Want a provider that's not listed? Open it against
-[robinebers/openusage](https://github.com/robinebers/openusage/issues/new).
-
-## How to Contribute
-
-Where to report depends on what's broken:
-
-- **Windows UI / installer / hotkey bug** → file here:
-  [Bigide19/openusage-windows/issues](https://github.com/Bigide19/openusage-windows/issues)
-- **Plugin / provider / data issue** → file upstream:
-  [robinebers/openusage/issues](https://github.com/robinebers/openusage/issues)
-- **Add a new provider** → see the [Plugin API](docs/plugins/api.md) and PR
-  upstream (plugins are JS and vendored from the upstream repo).
-
-PRs welcome. Keep it simple, include before/after screenshots for UI changes,
-and run `dotnet build` before submitting.
+next sync.
 
 ## Credits
 
@@ -95,7 +62,8 @@ and run `dotnet build` before submitting.
 
 ---
 
-## Build from source
+<details>
+<summary><strong>Build from source</strong></summary>
 
 > **Warning:** the `main` branch tracks in-progress work. Use tagged releases
 > for stable builds.
@@ -133,4 +101,6 @@ Settings are persisted at `%APPDATA%\OpenUsage\settings.json`; logs at
 ### Release build + installer
 
 See [`installer/README.md`](installer/README.md) for the NSIS packaging steps,
-or trigger the `windows-installer` GitHub Actions workflow on a tag.
+or trigger the `publish-windows` GitHub Actions workflow on a tag.
+
+</details>
