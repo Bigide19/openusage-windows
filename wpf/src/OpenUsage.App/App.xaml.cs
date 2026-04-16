@@ -4,6 +4,8 @@ using CommunityToolkit.Mvvm.Messaging;
 using H.NotifyIcon;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenUsage.App.Helpers;
+using OpenUsage.Core.Enums;
 using OpenUsage.Core.Interfaces;
 using OpenUsage.Core.Models;
 using OpenUsage.Services;
@@ -23,6 +25,15 @@ public partial class App : Application
     private TaskbarIcon? _trayIcon;
     private TrayPopupWindow? _popupWindow;
     private System.Threading.Timer? _settingsDebounceTimer;
+
+    // Which provider's primary progress line drives the tray-icon number.
+    // Defaults to the first enabled provider; re-evaluated when the user
+    // enables/disables providers in settings.
+    private string? _primaryProviderId;
+
+    // "Used" shows 26 for a 26%-used quota; "Left" shows 74. Kept in sync
+    // with settings so the tray icon matches the rest of the UI.
+    private DisplayMode _displayMode = DisplayMode.Left;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -101,6 +112,11 @@ public partial class App : Application
             // Store all metas for sidebar
             mainVm.PluginMetas = enabledMetas;
 
+            // First enabled provider drives the tray-icon number. No UI yet
+            // to let the user pick a different one — follow-up task.
+            _primaryProviderId = enabledMetas.FirstOrDefault()?.Id;
+            _displayMode = settings.DisplayMode;
+
             var settingsVm = mainVm.Settings;
             settingsVm.LoadSettings(settings, metas);
 
@@ -150,6 +166,14 @@ public partial class App : Application
                 {
                     overviewVm.UpdateProviderData(output.ProviderId, output);
                     WeakReferenceMessenger.Default.Send(new PluginDataUpdatedMessage(output.ProviderId, output));
+
+                    if (string.Equals(output.ProviderId, _primaryProviderId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var meta = mainVm.PluginMetas.FirstOrDefault(m =>
+                            string.Equals(m.Id, output.ProviderId, StringComparison.OrdinalIgnoreCase));
+                        if (meta is not null)
+                            UpdateTrayIconForPrimary(output, meta);
+                    }
                 });
             };
 
@@ -205,6 +229,8 @@ public partial class App : Application
                         var newEnabledMetas = metas.Where(m => !newDisabledSet.Contains(m.Id)).ToList();
                         overviewVm.Initialize(newEnabledMetas);
                         mainVm.PluginMetas = newEnabledMetas;
+                        _primaryProviderId = newEnabledMetas.FirstOrDefault()?.Id;
+                        _displayMode = newSettings.DisplayMode;
 
                         // Restart Rust backend with new enabled set (cheapest live-reload path)
                         var newEnabledIds = newEnabledMetas.Select(m => m.Id).ToList();
@@ -303,6 +329,46 @@ public partial class App : Application
         services.AddSingleton<AboutViewModel>();
 
         return services.BuildServiceProvider();
+    }
+
+    /// <summary>
+    /// Picks the primary progress line (per <see cref="PluginMeta.PrimaryCandidates"/>
+    /// with a fallback to the first progress line) and repaints the tray
+    /// icon with its percentage. Leaves the default icon untouched if the
+    /// primary metric isn't a percentage — showing "$12" in a 32×32 icon
+    /// reads worse than a brand glyph.
+    /// </summary>
+    private void UpdateTrayIconForPrimary(PluginOutput output, PluginMeta meta)
+    {
+        if (_trayIcon is null) return;
+
+        var progressLines = output.Lines.OfType<ProgressMetricLine>().ToList();
+        if (progressLines.Count == 0) return;
+
+        ProgressMetricLine? primary = null;
+        foreach (var candidate in meta.PrimaryCandidates)
+        {
+            primary = progressLines.FirstOrDefault(p =>
+                string.Equals(p.Label, candidate, StringComparison.OrdinalIgnoreCase));
+            if (primary is not null) break;
+        }
+        primary ??= progressLines[0];
+
+        if (primary.Format.Kind != ProgressFormatKind.Percent)
+            return;
+
+        // Plugins always emit Used. "Left" mode is a purely cosmetic flip in
+        // the UI — if the user picks it in settings, the tray should show
+        // remaining quota too or the tray and the panel will disagree.
+        var rawUsed = primary.Used;
+        var display = _displayMode == DisplayMode.Left
+            ? Math.Max(0, primary.Limit - rawUsed)
+            : rawUsed;
+        var percent = (int)Math.Round(display);
+
+        var brandColor = TrayIconRenderer.ParseBrandColor(meta.BrandColor);
+        _trayIcon.IconSource = TrayIconRenderer.RenderPercent(percent, brandColor, meta.IconUrl);
+        _trayIcon.ToolTipText = $"OpenUsage · {meta.Name} {primary.Label} {percent}% ({_displayMode.ToString().ToLowerInvariant()})";
     }
 
     private string GetPluginsDirectory()

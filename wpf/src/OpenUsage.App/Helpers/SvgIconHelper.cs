@@ -116,7 +116,7 @@ public static class SvgIconHelper
         }
     }
 
-    private static List<string> ExtractSvgPaths(string svgXml)
+    internal static List<string> ExtractSvgPaths(string svgXml)
     {
         var paths = new List<string>();
         try
