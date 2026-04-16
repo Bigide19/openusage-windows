@@ -1,6 +1,6 @@
 ; OpenUsage Windows installer — NSIS script
 ;
-; Invoked by the `windows-installer.yml` GitHub Actions workflow with:
+; Invoked by the `publish-windows.yml` GitHub Actions workflow with:
 ;   makensis /DVERSION=<ver> openusage.nsi
 ;
 ; Expected inputs (relative to this file):
@@ -68,6 +68,11 @@ VIAddVersionKey "ProductVersion" "${VERSION}"
 ; ---------------------------------------------------------------------------
 Section "Install"
   SetOutPath "$INSTDIR"
+
+  ; Kill running instance before overwriting files (upgrade scenario).
+  nsExec::Exec 'taskkill /F /IM "${APPEXE}"'
+  nsExec::Exec 'taskkill /F /IM "${BACKEND}"'
+  Sleep 400
 
   ; File /r bundles at build time — if the payload is missing, makensis
   ; itself will fail, so no runtime check is needed.
