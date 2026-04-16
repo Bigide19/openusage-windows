@@ -92,9 +92,14 @@
                             <TextBlock Text="OpenUsage v1.0.0" FontSize="11"
                                        Foreground="{DynamicResource TextMutedBrush}"
                                        HorizontalAlignment="Left" VerticalAlignment="Center" />
-                            <TextBlock x:Name="NextUpdateText" FontSize="11"
-                                       Foreground="{DynamicResource TextMutedBrush}"
-                                       HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            <!-- Clickable countdown: text shows "Next update in Xs",
+                                 clicking triggers a manual refresh of all providers. -->
+                            <Button x:Name="NextUpdateButton"
+                                    Style="{StaticResource LinkButtonStyle}"
+                                    Content="{Binding NextUpdateLabel}"
+                                    Command="{Binding Overview.RefreshAllCommand}"
+                                    ToolTip="Refresh now"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center" />
                         </Grid>
                     </Border>
                 </Grid>

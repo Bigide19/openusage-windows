@@ -20,6 +20,7 @@ public sealed class ProbeScheduler : IProbeScheduler
     private bool _disposed;
 
     public event EventHandler<PluginOutput>? ProbeCompleted;
+    public event EventHandler<DateTimeOffset>? BatchCompleted;
 
     public ProbeScheduler(IRustBackendClient client, ILogger<ProbeScheduler> logger)
     {
@@ -63,6 +64,10 @@ public sealed class ProbeScheduler : IProbeScheduler
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "RunAllProbesAsync failed");
+        }
+        finally
+        {
+            BatchCompleted?.Invoke(this, DateTimeOffset.UtcNow + _interval);
         }
     }
 

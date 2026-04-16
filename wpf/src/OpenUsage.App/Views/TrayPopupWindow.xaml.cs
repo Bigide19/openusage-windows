@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Threading;
 using OpenUsage.ViewModels;
 
 namespace OpenUsage.App.Views;
@@ -10,10 +11,22 @@ namespace OpenUsage.App.Views;
 public partial class TrayPopupWindow : Window
 {
     private bool _isPinned;
+    private readonly DispatcherTimer _countdownTimer;
 
     public TrayPopupWindow()
     {
         InitializeComponent();
+
+        // Drives the footer "Next update in Xs" label. The VM exposes NextUpdateAt
+        // as an absolute timestamp; we re-format it every second so the countdown
+        // visibly ticks down.
+        _countdownTimer = new DispatcherTimer(DispatcherPriority.Background)
+        {
+            Interval = TimeSpan.FromSeconds(1)
+        };
+        _countdownTimer.Tick += (_, _) => (DataContext as MainViewModel)?.TickNextUpdateLabel();
+        Loaded += (_, _) => _countdownTimer.Start();
+        Closed += (_, _) => _countdownTimer.Stop();
     }
 
     private void Window_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

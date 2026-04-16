@@ -20,6 +20,20 @@ public partial class MainViewModel : ObservableObject,
     [ObservableProperty]
     private List<PluginMeta> _pluginMetas = [];
 
+    /// <summary>
+    /// When the next automatic probe is scheduled. Null means the scheduler is
+    /// paused / not yet started. Pushed in by the host after each batch.
+    /// </summary>
+    [ObservableProperty]
+    private DateTimeOffset? _nextUpdateAt;
+
+    /// <summary>
+    /// Footer label like "Next update in 45s" / "Next update in 2m" / "Paused".
+    /// Recomputed by <see cref="TickNextUpdateLabel"/>; the View drives that tick.
+    /// </summary>
+    [ObservableProperty]
+    private string _nextUpdateLabel = "Paused";
+
     public OverviewViewModel Overview { get; }
     public ProviderDetailViewModel ProviderDetail { get; }
     public SettingsViewModel Settings { get; }
@@ -86,6 +100,29 @@ public partial class MainViewModel : ObservableObject,
         OnPropertyChanged(nameof(IsOnSubPage));
         OnPropertyChanged(nameof(PageTitle));
         OnPropertyChanged(nameof(SelectedNavId));
+    }
+
+    partial void OnNextUpdateAtChanged(DateTimeOffset? value) => TickNextUpdateLabel();
+
+    /// <summary>
+    /// Recomputes the countdown label from <see cref="NextUpdateAt"/>. The View
+    /// calls this on a 1s DispatcherTimer so the footer stays live.
+    /// </summary>
+    public void TickNextUpdateLabel()
+    {
+        if (NextUpdateAt is not { } at)
+        {
+            NextUpdateLabel = "Paused";
+            return;
+        }
+
+        var remaining = at - DateTimeOffset.UtcNow;
+        var totalSeconds = (int)Math.Ceiling(remaining.TotalSeconds);
+        if (totalSeconds < 0) totalSeconds = 0;
+
+        NextUpdateLabel = totalSeconds >= 60
+            ? $"Next update in {(int)Math.Ceiling(totalSeconds / 60.0)}m"
+            : $"Next update in {totalSeconds}s";
     }
 
     partial void OnSelectedProviderIdChanged(string? value)

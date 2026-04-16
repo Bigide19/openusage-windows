@@ -153,6 +153,22 @@ public partial class App : Application
                 });
             };
 
+            // Drive the "Next update in Xs" footer label. Setting NextUpdateAt on
+            // the UI thread so PropertyChanged fires on the right dispatcher.
+            scheduler.BatchCompleted += (_, nextAt) =>
+            {
+                Dispatcher.Invoke(() => mainVm.NextUpdateAt = nextAt);
+            };
+
+            // Manual refresh (footer countdown click, provider card refresh, etc.)
+            // was previously a no-op — the message was sent but never handled.
+            WeakReferenceMessenger.Default.Register<RefreshRequestedMessage>(this, (_, msg) =>
+            {
+                _ = string.IsNullOrEmpty(msg.ProviderId)
+                    ? scheduler.RunAllProbesAsync()
+                    : scheduler.RunProbeAsync(msg.ProviderId!);
+            });
+
             // Poll a bit faster than the Rust probe interval so UI updates appear promptly.
             var pollInterval = TimeSpan.FromSeconds(Math.Max(intervalSecs / 2, 5));
             _ = scheduler.StartAsync(pollInterval);
