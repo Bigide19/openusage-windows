@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using CommunityToolkit.Mvvm.Messaging;
 using OpenUsage.App.Helpers;
 using OpenUsage.ViewModels;
+using OpenUsage.ViewModels.Messages;
 
 namespace OpenUsage.App.Views.Controls;
 
@@ -76,6 +79,32 @@ public partial class SideNavigation : UserControl
     private void Settings_Click(object sender, RoutedEventArgs e)
     {
         NavigateToSettingsCommand?.Execute(null);
+    }
+
+    private const string HelpIssuesUrl = "https://github.com/Bigide19/openusage-windows/issues";
+
+    private void Help_Click(object sender, RoutedEventArgs e)
+    {
+        // Open the issue tracker in the user's default browser. UseShellExecute
+        // lets ShellExecute resolve the https handler; we can't Process.Start a
+        // URL directly in .NET 10 without this flag.
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = HelpIssuesUrl,
+                UseShellExecute = true
+            });
+        }
+        catch
+        {
+            // Swallow — if the browser fails to launch we still want to hide the panel.
+        }
+
+        // Mirror the React behaviour: after clicking Help, dismiss the popup so
+        // the browser gets focus. PanelToggleMessage toggles visibility, which
+        // is "hide" when we're visible (the only time this handler can fire).
+        WeakReferenceMessenger.Default.Send(new PanelToggleMessage());
     }
 
     private void Pin_Click(object sender, RoutedEventArgs e)

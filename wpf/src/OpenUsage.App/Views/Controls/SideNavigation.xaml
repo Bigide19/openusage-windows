@@ -100,6 +100,20 @@
                            VerticalAlignment="Center" />
             </Button>
 
+            <!-- ── Bottom: Help button (sits above Settings since it's docked after) ── -->
+            <Button x:Name="HelpButton"
+                    DockPanel.Dock="Bottom"
+                    Style="{StaticResource NavButtonStyle}"
+                    Click="Help_Click"
+                    ToolTip="Help / report an issue">
+                <TextBlock x:Name="HelpIcon" Text="&#xE897;"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="18"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+            </Button>
+
             <!-- ── Separator between home and plugin list ── -->
             <Border DockPanel.Dock="Top" Height="1" Margin="8,4"
                     Background="{DynamicResource SidebarBorderBrush}" />
