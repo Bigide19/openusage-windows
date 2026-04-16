@@ -45,10 +45,6 @@
             </Setter>
         </Style>
 
-        <!-- Wide toggle with subtitle text -->
-        <Style x:Key="ToggleOptionWithSubtitle" TargetType="RadioButton" BasedOn="{StaticResource ToggleOptionButton}">
-            <Setter Property="Padding" Value="12,10" />
-        </Style>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto"
@@ -122,32 +118,14 @@
             <Border Background="{DynamicResource MutedBackgroundBrush}"
                     CornerRadius="8" Padding="4">
                 <UniformGrid Rows="1">
-                    <RadioButton Style="{StaticResource ToggleOptionWithSubtitle}"
+                    <RadioButton Style="{StaticResource ToggleOptionButton}"
                                  GroupName="ResetTimer"
-                                 IsChecked="{Binding ResetTimerDisplayMode, Converter={StaticResource EnumBoolConverter}, ConverterParameter={x:Static enums:ResetTimerDisplayMode.Relative}}">
-                        <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="Relative" FontSize="13" FontWeight="Medium"
-                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
-                                       HorizontalAlignment="Center" />
-                            <TextBlock Text="5h 12m" FontSize="10"
-                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
-                                       Opacity="0.7"
-                                       HorizontalAlignment="Center" />
-                        </StackPanel>
-                    </RadioButton>
-                    <RadioButton Style="{StaticResource ToggleOptionWithSubtitle}"
+                                 IsChecked="{Binding ResetTimerDisplayMode, Converter={StaticResource EnumBoolConverter}, ConverterParameter={x:Static enums:ResetTimerDisplayMode.Relative}}"
+                                 Content="Relative" />
+                    <RadioButton Style="{StaticResource ToggleOptionButton}"
                                  GroupName="ResetTimer"
-                                 IsChecked="{Binding ResetTimerDisplayMode, Converter={StaticResource EnumBoolConverter}, ConverterParameter={x:Static enums:ResetTimerDisplayMode.Absolute}}">
-                        <StackPanel HorizontalAlignment="Center">
-                            <TextBlock Text="Absolute" FontSize="13" FontWeight="Medium"
-                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
-                                       HorizontalAlignment="Center" />
-                            <TextBlock Text="today at 11:04 AM" FontSize="10"
-                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=RadioButton}}"
-                                       Opacity="0.7"
-                                       HorizontalAlignment="Center" />
-                        </StackPanel>
-                    </RadioButton>
+                                 IsChecked="{Binding ResetTimerDisplayMode, Converter={StaticResource EnumBoolConverter}, ConverterParameter={x:Static enums:ResetTimerDisplayMode.Absolute}}"
+                                 Content="Absolute" />
                 </UniformGrid>
             </Border>
 
