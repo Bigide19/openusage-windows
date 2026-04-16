@@ -4,7 +4,7 @@ namespace OpenUsage.ViewModels;
 
 public partial class AboutViewModel : ObservableObject
 {
-    public string AppVersion { get; init; } = "0.1.1";
+    public string AppVersion { get; init; } = "0.1.2";
 
     public string ProjectUrl => "https://github.com/Bigide19/openusage-windows";
 

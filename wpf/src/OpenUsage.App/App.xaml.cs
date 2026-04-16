@@ -120,6 +120,13 @@ public partial class App : Application
             var settingsVm = mainVm.Settings;
             settingsVm.LoadSettings(settings, metas);
 
+            // Sync auto-start registry with persisted setting
+            var autoStartService = _services.GetRequiredService<AutoStartService>();
+            if (settings.StartOnLogin)
+                autoStartService.Enable();
+            else
+                autoStartService.Disable();
+
             _popupWindow = new TrayPopupWindow { DataContext = mainVm };
 
             WeakReferenceMessenger.Default.Register<PanelToggleMessage>(this, (_, _) =>
@@ -223,6 +230,13 @@ public partial class App : Application
                     await Dispatcher.InvokeAsync(async () =>
                     {
                         await settingsService.SaveAsync(newSettings);
+
+                        // Apply auto-start registry entry
+                        var autoStart = _services.GetRequiredService<AutoStartService>();
+                        if (newSettings.StartOnLogin)
+                            autoStart.Enable();
+                        else
+                            autoStart.Disable();
 
                         // Rebuild overview with new enabled plugins
                         var newDisabledSet = newSettings.Plugins.Disabled.ToHashSet(StringComparer.OrdinalIgnoreCase);
