@@ -5,7 +5,7 @@ Track all your AI coding subscriptions from the Windows system tray. Fork of
 .NET / WPF frontend driving the original Rust plugin engine as a headless
 sidecar.
 
-![OpenUsage Screenshot](screenshot.png)
+![OpenUsage Screenshot](screenshot.svg)
 
 ## Download
 
